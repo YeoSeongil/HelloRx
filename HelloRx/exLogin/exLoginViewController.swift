@@ -6,9 +6,6 @@
 //
 
 import UIKit
-
-
-import UIKit
 import RxSwift
 import RxCocoa
 import SnapKit
@@ -121,54 +118,55 @@ class exLoginViewController: UIViewController {
         let validCheckPw = BehaviorSubject(value: false)
     
         idTextField.rx.text.orEmpty
+            .asDriver()
             .map{self.isEmpty(text: $0)}
-            .bind(to: emptyCheckId)
+            .drive(emptyCheckId)
             .disposed(by: disposeBag)
         
         pwTextField.rx.text.orEmpty
+            .asDriver()
             .map{self.isEmpty(text: $0)}
-            .bind(to: emptyCheckPw)
+            .drive(emptyCheckPw)
             .disposed(by: disposeBag)
         
         idTextField.rx.text.orEmpty
+            .asDriver()
             .map{ self.checkId(id:$0) }
-            .bind(to: validCheckId)
+            .drive(validCheckId)
             .disposed(by: disposeBag)
         
         pwTextField.rx.text.orEmpty
+            .asDriver()
             .map{ self.checkPw(pw:$0) }
-            .bind(to: validCheckPw)
+            .drive(validCheckPw)
             .disposed(by: disposeBag)
         
         // output
         emptyCheckId
-            .bind(to: validIdView.rx.isHidden )
+            .asDriver(onErrorJustReturn: false)
+            .drive(validIdView.rx.isHidden )
             .disposed(by: disposeBag)
         
         emptyCheckPw
-            .bind(to: validPwView.rx.isHidden )
+            .asDriver(onErrorJustReturn: false)
+            .drive(validPwView.rx.isHidden )
             .disposed(by: disposeBag)
         
         validCheckId
-            .subscribe(onNext: { isChecked in
-                if isChecked == true {
-                    self.validIdView.rx.backgroundColor.onNext(.green)
-                } else {
-                    self.validIdView.rx.backgroundColor.onNext(.red)
-                }
-            }).disposed(by: disposeBag)
+            .asDriver(onErrorJustReturn: false)
+            .map { $0 ? UIColor.green : UIColor.red}
+            .drive( self.validIdView.rx.backgroundColor)
+            .disposed(by: disposeBag)
         
         validCheckPw
-            .subscribe(onNext: { isChecked in
-                if isChecked == true {
-                    self.validPwView.rx.backgroundColor.onNext(.green)
-                } else {
-                    self.validPwView.rx.backgroundColor.onNext(.red)
-                }
-            }).disposed(by: disposeBag)
+            .asDriver(onErrorJustReturn: false)
+            .map { $0 ? UIColor.green : UIColor.red}
+            .drive(self.validPwView.rx.backgroundColor)
+            .disposed(by: disposeBag)
         
         Observable.combineLatest(validCheckId, validCheckPw, resultSelector:  { $0 && $1})
-            .bind(to: loginButton.rx.isEnabled)
+            .asDriver(onErrorJustReturn: false)
+            .drive(loginButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
     
@@ -184,3 +182,5 @@ class exLoginViewController: UIViewController {
         return pw.count > 5
     }
 }
+
+

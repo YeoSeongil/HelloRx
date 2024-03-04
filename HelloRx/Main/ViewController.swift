@@ -42,7 +42,7 @@ class ViewController: UIViewController {
     }
     
     private func bind() {
-        let tableViewItem = Observable<[String]>.just(["asyncImageLoad", "exLogin"])
+        let tableViewItem = Observable<[String]>.just(["asyncImageLoad", "exLogin", "MVVM + exLogin"])
         
         tableViewItem.bind(to: tableView.rx.items(cellIdentifier: MainTableViewCell.id, cellType: MainTableViewCell.self)) { row, item, cell in
             cell.configuration(item: item)
@@ -56,6 +56,8 @@ class ViewController: UIViewController {
                     self?.navigationController?.pushViewController(AsyncImageLoadViewController(), animated: true)
                 case 1:
                     self?.navigationController?.pushViewController(exLoginViewController(), animated: true)
+                case 2:
+                    self?.navigationController?.pushViewController(MVVMexLoginViewController(), animated: true)
                 default:
                     break
                 }
