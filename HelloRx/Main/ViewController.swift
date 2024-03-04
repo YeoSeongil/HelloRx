@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     var tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .white
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: MainTableViewCell.id)
         return tableView
     }()
     
@@ -24,21 +25,41 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         setView()
         setConstraint()
+        bind()
     }
     
     private func setView() {
         view.addSubview(tableView)
-        view.backgroundColor = .black
+        view.backgroundColor = .white
+        title = "HelloRx"
     }
     
     private func setConstraint() {
         tableView.snp.makeConstraints {
             $0.verticalEdges.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(20)
         }
     }
     
-
-
+    private func bind() {
+        let tableViewItem = Observable<[String]>.just(["asyncImageLoad", "exLogin"])
+        
+        tableViewItem.bind(to: tableView.rx.items(cellIdentifier: MainTableViewCell.id, cellType: MainTableViewCell.self)) { row, item, cell in
+            cell.configuration(item: item)
+        }.disposed(by: disposeBag)
+        
+        tableView.rx.itemSelected
+            .bind { [weak self] indexPath in
+                switch indexPath.row {
+                case 0:
+                    //self?.present(AsyncImageLoadViewController(), animated: true)
+                    self?.navigationController?.pushViewController(AsyncImageLoadViewController(), animated: true)
+                case 1:
+                    self?.navigationController?.pushViewController(exLoginViewController(), animated: true)
+                default:
+                    break
+                }
+            }.disposed(by: disposeBag)
+    }
 }
 
