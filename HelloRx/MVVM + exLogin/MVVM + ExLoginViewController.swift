@@ -11,11 +11,11 @@ import RxCocoa
 import SnapKit
 
 class MVVMexLoginViewController: UIViewController {
-
-    let viewModel = ExLoginViewModel()
-    var disposeBag = DisposeBag()
     
-    let idTextField: UITextField = {
+    private let viewModel = ExLoginViewModel()
+    private var disposeBag = DisposeBag()
+    
+    private let idTextField: UITextField = {
         let textField = UITextField()
         textField.textColor = .black
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
@@ -25,7 +25,7 @@ class MVVMexLoginViewController: UIViewController {
         return textField
     }()
     
-    let pwTextField: UITextField = {
+    private let pwTextField: UITextField = {
         let textField = UITextField()
         textField.textColor = .black
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
@@ -35,21 +35,21 @@ class MVVMexLoginViewController: UIViewController {
         return textField
     }()
     
-    let validIdView: UIView = {
+    private let validIdView: UIView = {
         let view = UIView()
         view.backgroundColor = .red
         view.layer.cornerRadius = 5
         return view
     }()
     
-    let validPwView: UIView = {
+    private let validPwView: UIView = {
         let view = UIView()
         view.backgroundColor = .red
         view.layer.cornerRadius = 5
         return view
     }()
     
-    let loginButton: UIButton = {
+    private let loginButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemIndigo
         button.setTitle("Login", for: .normal)
@@ -106,6 +106,7 @@ class MVVMexLoginViewController: UIViewController {
         }
     }
     
+
     private func bind() {
         loginButton.rx.tap
             .bind { print("login") }
@@ -115,6 +116,7 @@ class MVVMexLoginViewController: UIViewController {
         idTextField.rx.text.orEmpty
             .bind(to: viewModel.inputIdText)
             .disposed(by: disposeBag)
+
         
         pwTextField.rx.text.orEmpty
             .bind(to: viewModel.inputPwText)
@@ -147,47 +149,43 @@ class MVVMexLoginViewController: UIViewController {
 
 class ExLoginViewModel {
     
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     
-    let inputIdText = BehaviorSubject(value: "")
-    let inputPwText = BehaviorSubject(value: "")
+    var inputIdText = BehaviorSubject(value: "")
+    var inputPwText = BehaviorSubject(value: "")
     
-    let emptyCheckId = BehaviorSubject(value: false)
-    let emptyCheckPw = BehaviorSubject(value: false)
+    var emptyCheckId = BehaviorSubject(value: false)
+    var emptyCheckPw = BehaviorSubject(value: false)
     
-    let validCheckId = BehaviorSubject(value: false)
-    let validCheckPw = BehaviorSubject(value: false)
+    var validCheckId = BehaviorSubject(value: false)
+    var validCheckPw = BehaviorSubject(value: false)
     
-    let validLogin = BehaviorSubject(value: false)
-                                     
+    var validLogin = BehaviorSubject(value: false)
+    
     init() {
         inputIdText
-            .asDriver(onErrorJustReturn: "")
             .map { self.isEmpty(text: $0) }
-            .drive(emptyCheckId)
-            .disposed(by: disposeBag)
-        
-        inputPwText
-            .asDriver(onErrorJustReturn: "")
-            .map { self.isEmpty(text: $0) }
-            .drive(emptyCheckPw)
+            .bind(to: emptyCheckId)
             .disposed(by: disposeBag)
         
         inputIdText
-            .asDriver(onErrorJustReturn: "")
             .map { self.checkId(id: $0) }
-            .drive(validCheckId)
-            .disposed(by: disposeBag)
-            
-        inputPwText
-            .asDriver(onErrorJustReturn: "")
-            .map{ self.checkPw(pw: $0) }
-            .drive(validCheckPw)
+            .bind(to: validCheckId)
             .disposed(by: disposeBag)
         
+        inputPwText
+            .map { self.isEmpty(text: $0) }
+            .bind(to: emptyCheckPw)
+            .disposed(by: disposeBag)
+        
+        inputPwText
+            .map{ self.checkPw(pw: $0) }
+            .bind(to: validCheckPw)
+            .disposed(by: disposeBag)
+        
+        
         Observable.combineLatest(validCheckId, validCheckPw, resultSelector: { $0 && $1})
-            .asDriver(onErrorJustReturn: false)
-            .drive(validLogin)
+            .bind(to: validLogin)
             .disposed(by: disposeBag)
     }
     
