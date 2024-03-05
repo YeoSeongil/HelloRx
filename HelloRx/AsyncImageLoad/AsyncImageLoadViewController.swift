@@ -67,23 +67,27 @@ class AsyncImageLoadViewController: UIViewController {
     
     private func bind() {
         Observable<Int>.timer(.seconds(0), period: .seconds(1), scheduler: MainScheduler.instance)
+            .asDriver(onErrorJustReturn: 0)
             .map{ String($0) }
-            .bind(to: timeLabel.rx.text)
+            .drive(timeLabel.rx.text)
             .disposed(by: disposeBag)
         
         // input
-        let inputImage = PublishSubject<UIImage>()
+        guard let initImage = UIImage(systemName: "photo") else { return }
+        let inputImage = BehaviorRelay<UIImage>(value: initImage)
         loadImageButton.rx.tap
             .bind {
                 self.loadImage()
                     .subscribe { item in
-                        inputImage.on(.next(item))
+                        //inputImage.on(.next(item))
+                        inputImage.accept(item)
                     }.disposed(by: self.disposeBag)
             }.disposed(by: disposeBag)
 
         // output
         inputImage
-            .bind(to: imageView.rx.image)
+            .asDriver()
+            .drive(imageView.rx.image)
             .disposed(by: disposeBag)
     }
     

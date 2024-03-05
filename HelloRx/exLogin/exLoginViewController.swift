@@ -12,9 +12,9 @@ import SnapKit
 
 class exLoginViewController: UIViewController {
     
-    var disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     
-    let idTextField: UITextField = {
+    private let idTextField: UITextField = {
         let textField = UITextField()
         textField.textColor = .black
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
@@ -24,7 +24,7 @@ class exLoginViewController: UIViewController {
         return textField
     }()
     
-    let pwTextField: UITextField = {
+    private let pwTextField: UITextField = {
         let textField = UITextField()
         textField.textColor = .black
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 0))
@@ -34,21 +34,21 @@ class exLoginViewController: UIViewController {
         return textField
     }()
     
-    let validIdView: UIView = {
+    private let validIdView: UIView = {
         let view = UIView()
         view.backgroundColor = .red
         view.layer.cornerRadius = 5
         return view
     }()
     
-    let validPwView: UIView = {
+    private let validPwView: UIView = {
         let view = UIView()
         view.backgroundColor = .red
         view.layer.cornerRadius = 5
         return view
     }()
     
-    let loginButton: UIButton = {
+    private let loginButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemIndigo
         button.setTitle("Login", for: .normal)
@@ -111,12 +111,12 @@ class exLoginViewController: UIViewController {
             .disposed(by: disposeBag)
         
         // input
-        let emptyCheckId = BehaviorSubject(value: false)
-        let emptyCheckPw = BehaviorSubject(value: false)
+        let emptyCheckId = BehaviorRelay(value: false)
+        let emptyCheckPw = BehaviorRelay(value: false)
         
-        let validCheckId = BehaviorSubject(value: false)
-        let validCheckPw = BehaviorSubject(value: false)
-    
+        let validCheckId = BehaviorRelay(value: false)
+        let validCheckPw = BehaviorRelay(value: false)
+        
         idTextField.rx.text.orEmpty
             .asDriver()
             .map{self.isEmpty(text: $0)}

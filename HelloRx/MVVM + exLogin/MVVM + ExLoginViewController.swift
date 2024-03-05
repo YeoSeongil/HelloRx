@@ -114,90 +114,42 @@ class MVVMexLoginViewController: UIViewController {
         
         // input
         idTextField.rx.text.orEmpty
-            .bind(to: viewModel.inputIdText)
+            .asDriver()
+            .drive(viewModel.inputIdText)
             .disposed(by: disposeBag)
 
-        
         pwTextField.rx.text.orEmpty
-            .bind(to: viewModel.inputPwText)
+            .asDriver()
+            .drive(viewModel.inputPwText)
             .disposed(by: disposeBag)
         
         // output
         viewModel.emptyCheckId
-            .bind(to: validIdView.rx.isHidden )
+            .asDriver()
+            .drive(validIdView.rx.isHidden )
             .disposed(by: disposeBag)
         
         viewModel.emptyCheckPw
-            .bind(to: validPwView.rx.isHidden )
+            .asDriver()
+            .drive(validPwView.rx.isHidden )
             .disposed(by: disposeBag)
         
         viewModel.validCheckId
+            .asDriver()
             .map { $0 ? UIColor.green : UIColor.red}
-            .bind(to: self.validIdView.rx.backgroundColor)
+            .drive(self.validIdView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         viewModel.validCheckPw
+            .asDriver()
             .map { $0 ? UIColor.green : UIColor.red}
-            .bind(to: self.validPwView.rx.backgroundColor)
+            .drive(self.validPwView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         viewModel.validLogin
-            .bind(to: self.loginButton.rx.isEnabled)
+            .asDriver()
+            .drive(self.loginButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
 }
 
-class ExLoginViewModel {
-    
-    private let disposeBag = DisposeBag()
-    
-    var inputIdText = BehaviorSubject(value: "")
-    var inputPwText = BehaviorSubject(value: "")
-    
-    var emptyCheckId = BehaviorSubject(value: false)
-    var emptyCheckPw = BehaviorSubject(value: false)
-    
-    var validCheckId = BehaviorSubject(value: false)
-    var validCheckPw = BehaviorSubject(value: false)
-    
-    var validLogin = BehaviorSubject(value: false)
-    
-    init() {
-        inputIdText
-            .map { self.isEmpty(text: $0) }
-            .bind(to: emptyCheckId)
-            .disposed(by: disposeBag)
-        
-        inputIdText
-            .map { self.checkId(id: $0) }
-            .bind(to: validCheckId)
-            .disposed(by: disposeBag)
-        
-        inputPwText
-            .map { self.isEmpty(text: $0) }
-            .bind(to: emptyCheckPw)
-            .disposed(by: disposeBag)
-        
-        inputPwText
-            .map{ self.checkPw(pw: $0) }
-            .bind(to: validCheckPw)
-            .disposed(by: disposeBag)
-        
-        
-        Observable.combineLatest(validCheckId, validCheckPw, resultSelector: { $0 && $1})
-            .bind(to: validLogin)
-            .disposed(by: disposeBag)
-    }
-    
-    private func isEmpty(text: String) -> Bool {
-        return text.isEmpty && text.count == 0
-    }
-    
-    private func checkId(id: String) -> Bool {
-        return id.contains("@") && id.contains(".")
-    }
-    
-    private func checkPw(pw: String) -> Bool {
-        return pw.count > 5
-    }
-}

@@ -42,7 +42,7 @@ class ViewController: UIViewController {
     }
     
     private func bind() {
-        let tableViewItem = Observable<[String]>.just(["asyncImageLoad", "exLogin", "MVVM + exLogin"])
+        let tableViewItem = Observable<[String]>.just(["exBind", "exValidation", "URLSession + asyncImageLoad", "exLogin", "MVVM + exLogin", "MVVM + BookSearch"])
         
         tableViewItem.bind(to: tableView.rx.items(cellIdentifier: MainTableViewCell.id, cellType: MainTableViewCell.self)) { row, item, cell in
             cell.configuration(item: item)
@@ -52,12 +52,17 @@ class ViewController: UIViewController {
             .bind { [weak self] indexPath in
                 switch indexPath.row {
                 case 0:
-                    //self?.present(AsyncImageLoadViewController(), animated: true)
-                    self?.navigationController?.pushViewController(AsyncImageLoadViewController(), animated: true)
+                    self?.navigationController?.pushViewController(ExBindViewController(), animated: true)
                 case 1:
-                    self?.navigationController?.pushViewController(exLoginViewController(), animated: true)
+                    self?.navigationController?.pushViewController(ExValidationViewController(), animated: true)
                 case 2:
+                    self?.navigationController?.pushViewController(AsyncImageLoadViewController(), animated: true)
+                case 3:
+                    self?.navigationController?.pushViewController(exLoginViewController(), animated: true)
+                case 4:
                     self?.navigationController?.pushViewController(MVVMexLoginViewController(), animated: true)
+                case 5:
+                    self?.navigationController?.pushViewController(BookSearchViewController(), animated: true)
                 default:
                     break
                 }
