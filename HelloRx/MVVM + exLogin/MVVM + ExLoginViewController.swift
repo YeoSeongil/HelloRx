@@ -12,7 +12,7 @@ import SnapKit
 
 class MVVMexLoginViewController: UIViewController {
     
-    private let viewModel = ExLoginViewModel()
+    let viewModel: ExLoginViewModelProtocol
     private var disposeBag = DisposeBag()
     
     private let idTextField: UITextField = {
@@ -55,6 +55,15 @@ class MVVMexLoginViewController: UIViewController {
         button.setTitle("Login", for: .normal)
         return button
     }()
+    
+    init(viewModel: ExLoginViewModelProtocol = ExLoginViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -115,38 +124,38 @@ class MVVMexLoginViewController: UIViewController {
         // input
         idTextField.rx.text.orEmpty
             .asDriver()
-            .drive(viewModel.inputIdText)
+            .drive(viewModel.whichLoginId)
             .disposed(by: disposeBag)
 
         pwTextField.rx.text.orEmpty
             .asDriver()
-            .drive(viewModel.inputPwText)
+            .drive(viewModel.whichLoginPw)
             .disposed(by: disposeBag)
         
         // output
-        viewModel.emptyCheckId
+        viewModel.emptyCheckIdResult
             .asDriver()
-            .drive(validIdView.rx.isHidden )
+            .drive(validIdView.rx.isHidden)
             .disposed(by: disposeBag)
         
-        viewModel.emptyCheckPw
+        viewModel.emptyCheckPwResult
             .asDriver()
-            .drive(validPwView.rx.isHidden )
+            .drive(validPwView.rx.isHidden)
             .disposed(by: disposeBag)
         
-        viewModel.validCheckId
+        viewModel.validCheckIdResult
             .asDriver()
             .map { $0 ? UIColor.green : UIColor.red}
             .drive(self.validIdView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
-        viewModel.validCheckPw
+        viewModel.validCheckPwResult
             .asDriver()
             .map { $0 ? UIColor.green : UIColor.red}
             .drive(self.validPwView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
-        viewModel.validLogin
+        viewModel.validLoginResult
             .asDriver()
             .drive(self.loginButton.rx.isEnabled)
             .disposed(by: disposeBag)

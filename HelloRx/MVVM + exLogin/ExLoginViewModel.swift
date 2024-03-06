@@ -9,56 +9,105 @@ import Foundation
 import RxSwift
 import RxCocoa
 
+protocol ExLoginViewModelProtocol {
+    // Input
+    var whichLoginId: AnyObserver<String> { get }
+    var whichLoginPw: AnyObserver<String> { get }
+    
+    // Output
+    var emptyCheckIdResult: Driver<Bool> { get }
+    var emptyCheckPwResult: Driver<Bool> { get }
+    var validCheckIdResult: Driver<Bool> { get }
+    var validCheckPwResult: Driver<Bool> { get }
+    var validLoginResult: Driver<Bool> { get }
+}
+
 class ExLoginViewModel {
     private let disposeBag = DisposeBag()
     
-    var inputIdText = BehaviorRelay(value: "")
-    var inputPwText = BehaviorRelay(value: "")
+    // Input
+    var inputIdText = BehaviorSubject<String>(value: "")
+    var inputPwText = BehaviorSubject<String>(value: "")
     
+    // Output
     var emptyCheckId = BehaviorRelay(value: false)
     var emptyCheckPw = BehaviorRelay(value: false)
-    
     var validCheckId = BehaviorRelay(value: false)
     var validCheckPw = BehaviorRelay(value: false)
-    
     var validLogin = BehaviorRelay(value: false)
     
     init() {
+        tryEmptyCheckId()
+        tryEmptyCheckPw()
+        tryValidCheckId()
+        tryValidCheckPw()
+        tryValidLogin()
+    }
+    
+    private func tryEmptyCheckId() {
         inputIdText
-            .map { self.isEmpty(text: $0) }
+            .map { $0.isEmpty && $0.count == 0 }
             .bind(to: emptyCheckId)
             .disposed(by: disposeBag)
-        
-        inputIdText
-            .map { self.checkId(id: $0) }
-            .bind(to: validCheckId)
-            .disposed(by: disposeBag)
-        
+    }
+    
+    private func tryEmptyCheckPw() {
         inputPwText
-            .map { self.isEmpty(text: $0) }
+            .map { $0.isEmpty && $0.count == 0 }
             .bind(to: emptyCheckPw)
             .disposed(by: disposeBag)
-        
+    }    
+    
+    private func tryValidCheckId() {
+        inputIdText
+            .map { $0.contains("@") && $0.contains(".") }
+            .bind(to: validCheckId)
+            .disposed(by: disposeBag)
+    }    
+    
+    private func tryValidCheckPw() {
         inputPwText
-            .map{ self.checkPw(pw: $0) }
+            .map { $0.count > 5 }
             .bind(to: validCheckPw)
             .disposed(by: disposeBag)
-        
-        
+    }    
+    
+    private func tryValidLogin() {
         Observable.combineLatest(validCheckId, validCheckPw, resultSelector: { $0 && $1})
             .bind(to: validLogin)
             .disposed(by: disposeBag)
     }
-    
-    private func isEmpty(text: String) -> Bool {
-        return text.isEmpty && text.count == 0
+}
+
+extension ExLoginViewModel: ExLoginViewModelProtocol {
+    // Input
+    var whichLoginId: AnyObserver<String> {
+        inputIdText.asObserver()
     }
     
-    private func checkId(id: String) -> Bool {
-        return id.contains("@") && id.contains(".")
+    var whichLoginPw: AnyObserver<String> {
+        inputPwText.asObserver()
     }
     
-    private func checkPw(pw: String) -> Bool {
-        return pw.count > 5
+    // Output
+    var emptyCheckIdResult: Driver<Bool> {
+        emptyCheckId.asDriver(onErrorJustReturn: false)
     }
+    
+    var emptyCheckPwResult: Driver<Bool> {
+        emptyCheckPw.asDriver(onErrorJustReturn: false)
+    }
+    
+    var validCheckIdResult: Driver<Bool> {
+        validCheckId.asDriver(onErrorJustReturn: false)
+    }
+    
+    var validCheckPwResult: Driver<Bool> {
+        validCheckPw.asDriver(onErrorJustReturn: false)
+    }
+    
+    var validLoginResult: Driver<Bool> {
+        validLogin.asDriver(onErrorJustReturn: false)
+    }
+    
 }
