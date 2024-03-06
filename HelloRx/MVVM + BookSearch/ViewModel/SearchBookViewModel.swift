@@ -27,7 +27,7 @@ class SearchBookViewModel {
     private let searchEvent = PublishSubject<Void>()
     
     // Output
-    private let fetchingSearchOutput = BehaviorRelay<[Document]>(value: [])
+    private let fetchingSearchOutput = PublishRelay<[Document]>()
     
     init() {
         trySearchForBookTitle()
@@ -38,19 +38,17 @@ class SearchBookViewModel {
             .withLatestFrom(searchKeyword)
             .filter { !$0.isEmpty }
             .distinctUntilChanged()
-        
+
         let searchBookValue = result
             .flatMapLatest(MainModel().searchBooks)
-            .share()
             .compactMap(MainModel().getBooksModelValue)
-        
-        let fetchData = searchBookValue
+
+        searchBookValue
             .map{ $0.documents }
-        
-        fetchData
             .bind(to: fetchingSearchOutput)
             .disposed(by: disposeBag)
     }
+
 }
 
 extension SearchBookViewModel: SearchBookViewModelProtocol {
