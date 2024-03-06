@@ -35,7 +35,7 @@ class SearchBookViewModel {
     
     private func trySearchForBookTitle() {
         let result = searchEvent
-            .withLatestFrom(searchKeyword) { $1 }
+            .withLatestFrom(searchKeyword)
             .filter { !$0.isEmpty }
             .distinctUntilChanged()
         
@@ -47,9 +47,9 @@ class SearchBookViewModel {
         let fetchData = searchBookValue
             .map{ $0.documents }
         
-        fetchData.subscribe() { doc in
-            self.fetchingSearchOutput.accept(doc)
-        }.disposed(by: disposeBag)
+        fetchData
+            .bind(to: fetchingSearchOutput)
+            .disposed(by: disposeBag)
     }
 }
 
