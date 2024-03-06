@@ -22,14 +22,14 @@ class SearchBookViewModel {
     
     let disposeBag = DisposeBag()
     
-    // input
+    // Input
     private let searchKeyword = BehaviorSubject<String>(value: "")
     private let searchEvent = PublishSubject<Void>()
     
-    // output
+    // Output
     private let fetchingSearchOutput = BehaviorRelay<[Document]>(value: [])
     
-    init(_ model: MainModel = MainModel()) {
+    init() {
         trySearchForBookTitle()
     }
     
