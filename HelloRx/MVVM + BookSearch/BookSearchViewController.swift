@@ -12,12 +12,11 @@ import SnapKit
 
 class BookSearchViewController: UIViewController {
 
-    private let viewModel = SearchBookViewModel()
+    private let viewModel : SearchBookViewModelProtocol
     private let disposeBag = DisposeBag()
     
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.showsSearchResultsButton
         return searchBar
     }()
     
@@ -27,6 +26,15 @@ class BookSearchViewController: UIViewController {
         tableView.register(BookTableViewCell.self, forCellReuseIdentifier: BookTableViewCell.id)
         return tableView
     }()
+    
+    init(viewModel: SearchBookViewModelProtocol = SearchBookViewModel()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,16 +66,16 @@ class BookSearchViewController: UIViewController {
         // input
         searchBar.rx.searchButtonClicked
             .asObservable()
-            .bind(to: viewModel.buttonTapped)
+            .bind(to: viewModel.tappedSearchButton)
             .disposed(by: disposeBag)
         
         searchBar.rx.text.orEmpty
             .asDriver()
-            .drive(viewModel.inputText)
+            .drive(viewModel.whichTitle)
             .disposed(by: disposeBag)
         
         // output
-        viewModel.cellData
+        viewModel.fetchedSearchOutput
             .drive(tableView.rx.items(cellIdentifier: BookTableViewCell.id, cellType: BookTableViewCell.self)) { row, item, cell in
             cell.configuration(item: item)
         }.disposed(by: disposeBag)

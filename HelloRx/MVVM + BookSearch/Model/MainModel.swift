@@ -16,9 +16,9 @@ struct MainModel {
     }
     
     func getBooksModelValue(_ searchResult : Result<Books, URLError>) -> Books? {
-           guard case .success(let value) = searchResult else {
-               return nil
-           }
-           return value
-       }
+        guard case .success(let success) = searchResult else {
+            return nil
+        }
+        return success
+    }
 }
